@@ -156,10 +156,36 @@ const getUsers = () => {
     });
 };
 
+const updateUserPaidStatus = ({ id, paid }) => {
+    return new Promise((resolve, reject) => {
+        const query = 'UPDATE users SET paid = ? WHERE id = ?';
+        db.run(query, [paid, id], function (err) {
+            if (err) {
+                return reject(err);
+            }
+            resolve({ id, paid });
+        });
+    });
+};
+
+const deleteUser = (id) => {
+    return new Promise((resolve, reject) => {
+        const query = 'DELETE FROM users WHERE id = ?';
+        db.run(query, id, function (err) {
+            if (err) {
+                return reject(err);
+            }
+            resolve();
+        });
+    });
+};
+
 module.exports = {
     createUser,
     updateUser,
+    updateUserPaidStatus,
     getUserById,
     getUsers,
+    deleteUser,
     db
 };

@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const handleWebhook = require('./webhookHandler');
-const { getUsers, createUser, getUserById } = require('./db');
+const { getUsers, getUserById, updateUser, updateUserPaidStatus, deleteUser } = require('./db');
 require('dotenv').config();
 
 const app = express();
@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 3000;
 const allowedOrigins = [
     'https://pickelgolfclassic.com',
     'https://www.pickelgolfclassic.com',
+    'http://localhost:5173'
 ];
 
 app.use(cors({
@@ -32,7 +33,7 @@ app.post('/api/update-user', async (req, res) => {
     console.log('Received data to update user:', req.body);
 
     try {
-        const updatedUser = await createUser({ firstName, lastName, friday, monday, shirt, clerkId, registered });
+        const updatedUser = await updateUser({ firstName, lastName, friday, monday, shirt, clerkId, registered });
         res.status(200).json({
             success: true,
             message: 'User updated successfully',
@@ -79,6 +80,31 @@ app.get('/api/users', async (req, res) => {
     } catch (error) {
         console.error('Error fetching users:', error.message);
         res.status(500).send('Error fetching users');
+    }
+});
+
+// Endpoint to update user's paid status
+app.put('/api/users/:id', async (req, res) => {
+    const { id } = req.params;
+    const { paid } = req.body;
+
+    try {
+        const updatedUserPaidStatus = await updateUserPaidStatus({ id, paid });
+        res.status(200).json(updatedUserPaidStatus);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Endpoint to delete a user
+app.delete('/api/users/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        await deleteUser(id);
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 
